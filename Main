@@ -1,0 +1,23 @@
+import numpy
+total_U = 0
+total_B = 0
+total_V = 0
+total_R = 0
+total_I = 0
+total_camera = 0
+total = [total_U, total_B, total_V, total_R, total_I, total_camera]
+array_camera = numpy.loadtxt('D:/camera_rc600.txt')
+array_U = numpy.loadtxt('D:/U_rc600.txt')
+array_B = numpy.loadtxt('D:/B_rc600.txt')
+array_V = numpy.loadtxt('D:/V_rc600.txt')
+array_R = numpy.loadtxt('D:/R_rc600.txt')
+array_I = numpy.loadtxt('D:/I_rc600.txt')
+array_of_arrays = [array_camera, array_U, array_B, array_V, array_R, array_I]
+
+#for array in array_of_arrays:
+print('camera = ', len(array_camera))
+print('U = ', len(array_U))
+print('B = ', len(array_B))
+print('V = ', len(array_V))
+print('R = ', len(array_R))
+print('I = ', len(array_I))
