@@ -1,17 +1,18 @@
+#In[1]
 import numpy as np
 import matplotlib.pyplot as plt
-
+from varname import nameof
 cam=np.loadtxt('D:/camera_rc600.txt')             #cam=np.loadtxt('D:/camera_rc600.txt')
 U=np.loadtxt('D:/U_rc600.txt')  
 B=np.loadtxt('D:/B_rc600.txt')                    #U/B/V=np.loadtxt('D:/B_rc600.txt')           for Kirill's PC
 V=np.loadtxt('D:/V_rc600.txt') 
-KRUTO = [U, B, V]
+filters = [U, B, V]
 wave=cam[18:,0]
 flux=cam[18:,1] / 100.0
-
-for z in KRUTO:
-    w=z[236:,0]
-    fl=z[236:,1] / 100.0
+#In[2]
+def Convolution(filt):
+    w=filt[236:,0]
+    fl=filt[236:,1] / 100.0
     Yos=[]
     Xos=[]
     j=0
@@ -44,10 +45,13 @@ for z in KRUTO:
     axe=figur.add_subplot(111)
     axe.grid(True, which=u'major')   
     axe.grid(True, which=u'minor')
-    figur.gca().set_xlabel(r'$\lambda(U/B/V),\AA$' ,fontsize=14)
+    figur.gca().set_xlabel(f'$\lambda(U/B/V),\AA$' ,fontsize=14)
     figur.gca().set_ylabel(u"pot, erg/sm $^2$ /c ",fontsize=14)
     gr=plt.plot(Xos, Yos , linestyle='-', marker=' ', color='k')
     gr=plt.plot(w, fl, linestyle='-', marker=' ', color='k')
     gr=plt.plot(Xos, Yos * fl , linestyle='-', marker=' ', color='k')
     plt.show()
     print()
+#In[3]
+for unit in filters:
+    Convolution(unit)
