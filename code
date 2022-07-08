@@ -2,8 +2,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-cam=np.loadtxt('C:/Users/Пользователь/Desktop/задача/camera_rc600.txt')
-B=np.loadtxt('C:/Users/Пользователь/Desktop/задача/B_rc600.txt')
+cam=np.loadtxt('C:/Users/Пользователь/Desktop/задача/camera_rc600.txt')             #cam=np.loadtxt('D:/camera_rc600.txt')
+B=np.loadtxt('C:/Users/Пользователь/Desktop/задача/B_rc600.txt')                    #B=np.loadtxt('D:/B_rc600.txt')           for Kirill's PC
 wave=cam[18::,0]
 flux=cam[18::,1]
 w=B[224::,0]
