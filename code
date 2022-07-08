@@ -54,16 +54,19 @@ print(Xos)
 #In[3]
 import matplotlib.pyplot as plt
 import numpy as np
+import math 
+import scipy.constants as sp
 
-h = 6.626e-34
-c = 3.0e+8
-k = 1.38e-23
-
+h = sp.h*10**7
+c = sp.c
+k = sp.k*10**7
+pi = math.pi
 def planck(wav, T):
-    a = 2.0*h*c**2
+    a = 8*pi*h*c
     b = h*c/(wav*k*T)
     intensity = a/ ( (wav**5) * (np.exp(b) - 1.0) )
     return intensity
+
 
 
 wavelengths = np.array(Xos) 
@@ -73,9 +76,23 @@ intensity5000 = planck(wavelengths / 1e9, 5000.)
 
 
 
-
 plt.plot(Xos, intensity5000, 'g-') # 5000K green line
 
 
 # show the plot
 plt.show()
+#In[4]
+figur=plt.figure()
+axe=figur.add_subplot(111)
+axe.grid(True, which=u'major')   
+axe.grid(True, which=u'minor')
+figur.gca().set_xlabel(f'$\lambda(U/B/V),\AA$' ,fontsize=14)
+figur.gca().set_ylabel(u"pot, erg/sm $^2$ /c ",fontsize=14)
+# gr=plt.plot(Xos, Yos , linestyle='-', marker=' ', color='k')
+# gr=plt.plot(w, fl, linestyle='-', marker=' ', color='k')
+# gr=plt.plot(Xos, Yos * fl , linestyle='-', marker=' ', color='k')
+# gr=plt.plot(Xos, Yos * fl * intensity5000, linestyle='-', marker=' ', color='k')
+plt.show()
+gr=plt.plot(Xos, Yos * fl , linestyle='-', marker=' ', color='k')
+gr=plt.plot(Xos, Yos * fl * intensity5000, linestyle='-', marker=' ', color='k')
+gr=plt.plot(Xos, intensity5000, linestyle='-', marker=' ', color='k')
