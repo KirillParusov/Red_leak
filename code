@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from varname import nameof
 cam=np.loadtxt('D:/camera_rc600.txt')             #cam=np.loadtxt('D:/camera_rc600.txt')
 U=np.loadtxt('D:/U_rc600.txt')  
-B=np.loadtxt('D:/B_rc600.txt')                    #U/B/V=np.loadtxt('D:/B_rc600.txt')           for Kirill's PC
+B=np.loadtxt('D:/B_rc600.txt')                    #U/B/V=np.loadtxt('D:/U/B/V_rc600.txt')           for Kirill's PC
 V=np.loadtxt('D:/V_rc600.txt') 
 filters = [U, B, V]
 wave=cam[18:,0]
