@@ -1,0 +1,77 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.constants import pi
+from scipy.constants import h
+from scipy.constants import c
+import math
+cam=np.loadtxt('C:/Users/Пользователь/Desktop/задача/camera_rc600.txt')
+B=np.loadtxt('C:/Users/Пользователь/Desktop/задача/B_rc600.txt')
+U=np.loadtxt('C:/Users/Пользователь/Desktop/задача/U_rc600.txt')
+V=np.loadtxt('C:/Users/Пользователь/Desktop/задача/V_rc600.txt')
+mas=[U,B,V]
+wave=cam[18:,0]
+flux=cam[18:,1]/100.0
+hp=h*10**7
+cc=c*100.
+kk=1.380649e-16
+T=5000.
+e=math.e
+ADB=[]
+print("1) U \n2) B \n3) V")
+def planck(wav, T):
+    a = 8*pi*hp*c
+    b = hp*c/(wav*kk*T)
+    intensity = a/ ( (wav**5) * (np.exp(b) - 1.0) )
+    return intensity
+
+for z in mas:
+    w=z[236:,0]
+    fl=z[236:,1]/100.0
+    Yos=[]
+    Xos=[]
+    j=0
+    x=0
+    for i in range(len(wave)-1):
+        x1=np.where(w<wave[i])[0][-1]
+        x2=np.where(w<=wave[i+1])[0][-1]
+        x=x2-x1
+        for k in range(x1,x2):
+            Xos.append(w[k])
+            Yos.append(flux[i]+((Xos[-1]-wave[i])*(flux[i+1]-flux[i]))/(wave[i+1]-wave[i]))
+    fl=fl[:-1]
+    w=w[:-1]        
+    wavelengths = np.array(Xos) 
+    ADB = planck(wavelengths / 1e9, T)
+
+    figur=plt.figure()
+    axe=figur.add_subplot(111)
+    axe.grid(True, which=u'major')   
+    axe.grid(True, which=u'minor')
+    figur.gca().set_xlabel(r'$\lambda,\AA$',fontsize=14)
+    figur.gca().set_ylabel(u"pot, erg/sm $^2$ /c",fontsize=14)
+    gr=plt.plot(w, fl, linestyle='-', marker=' ', color='k')
+    gr=plt.plot(Xos, Yos*fl, linestyle='-', marker=' ', color='k')
+    gr=plt.plot(Xos, Yos, linestyle='-', marker=' ', color='k')
+    plt.show()
+    gr=plt.plot(Xos, Yos*fl, linestyle='-', marker=' ', color='k')
+    plt.show()
+    gr=plt.plot(Xos, ADB, linestyle='-', marker=' ', color='k')
+    plt.show()
+    gr=plt.plot(Xos, Yos * fl * ADB, linestyle='-', marker=' ', color='k')
+    plt.show()
+# wavelengths = np.array(Xos) 
+
+# ADB = planck(wavelengths / 1e9, T)
+
+# figur=plt.figure()
+# axe=figur.add_subplot(111)
+# axe.grid(True, which=u'major')   
+# axe.grid(True, which=u'minor')
+# figur.gca().set_xlabel(r'$\lambda,\AA$',fontsize=14)
+# figur.gca().set_ylabel(u"pot, erg/sm $^2$ /c",fontsize=14)
+# gr=plt.plot(Xos, Yos * fl , linestyle='-', marker=' ', color='k')
+# plt.show()
+# gr=plt.plot(Xos, ADB, linestyle='-', marker=' ', color='k')
+# plt.show()
+# gr=plt.plot(Xos, Yos * fl * ADB, linestyle='-', marker=' ', color='k')
+# plt.show()
