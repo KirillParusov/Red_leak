@@ -1,98 +1,232 @@
-#In[1]
 import numpy as np
 import matplotlib.pyplot as plt
-from varname import nameof
 cam=np.loadtxt('D:/camera_rc600.txt')             #cam=np.loadtxt('D:/camera_rc600.txt')
 U=np.loadtxt('D:/U_rc600.txt')  
 B=np.loadtxt('D:/B_rc600.txt')                    #U/B/V=np.loadtxt('D:/B_rc600.txt')           for Kirill's PC
 V=np.loadtxt('D:/V_rc600.txt') 
-# filters = [U, B, V]
+filters = [U, B, V]
 wave=cam[18:,0]
 flux=cam[18:,1] / 100.0
-#In[2]
-w=B[236:,0]
-fl=B[236:,1] / 100.0
-Yos=[]
-Xos=[]
-j=0
-x=0
-total=0
-for i in range(len(wave)-1):
-    x1=np.where(w<=wave[i])[0][-1]
-    x2=np.where(w<=wave[i+1])[0][-1]
-    x=x2-x1
-#     print(x1, x2)
-    for k in range(x1, x2):
-        Xos.append(w[k])
-        Yos.append(flux[i]+((Xos[-1]-wave[i])*(flux[i+1]-flux[i]))/(wave[i+1]-wave[i]))
-        total=total+1440
-
-fl = fl[:-1]
-w = w[:-1]
-# print(len(Xos))
-#     print(len(Yos))
-#     print(len(fl))
-#     print()
-#     print(Xos[0], w[0])
-#     print(Xos[-1], w[-1])
-
-# for u in range(len(Xos)):
-#     print(Xos[u],Yos[u])
-# print(Xos[:101:])
-# print(Yos[:2000:1])
-figur=plt.figure()
-axe=figur.add_subplot(111)
-axe.grid(True, which=u'major')   
-axe.grid(True, which=u'minor')
-figur.gca().set_xlabel(f'$\lambda(U/B/V),\AA$' ,fontsize=14)
-figur.gca().set_ylabel(u"pot, erg/sm $^2$ /c ",fontsize=14)
-gr=plt.plot(Xos, Yos , linestyle='-', marker=' ', color='k')
-gr=plt.plot(w, fl, linestyle='-', marker=' ', color='k')
-gr=plt.plot(Xos, Yos * fl , linestyle='-', marker=' ', color='k')
-plt.show()
-print(Xos)
-#In[3]
-import matplotlib.pyplot as plt
-import numpy as np
-import math 
-import scipy.constants as sp
-
-h = sp.h*10**7
-c = sp.c
-k = sp.k*10**7
-pi = math.pi
-def planck(wav, T):
-    a = 8*pi*h*c
-    b = h*c/(wav*k*T)
-    intensity = a/ ( (wav**5) * (np.exp(b) - 1.0) )
-    return intensity
 
 
+def U_graph():
+    import matplotlib.pyplot as plt
+    import numpy as np
+    import math 
+    import scipy.constants as sp
+    w=U[236:,0]
+    fl=U[236:,1] / 100.0
+    Yos=[]
+    Xos=[]
+    j=0
+    x=0
+    total=0
+    for i in range(len(wave)-1):
+        x1=np.where(w<=wave[i])[0][-1]
+        x2=np.where(w<=wave[i+1])[0][-1]
+        x=x2-x1
+        for k in range(x1, x2):
+            Xos.append(w[k])
+            Yos.append(flux[i]+((Xos[-1]-wave[i])*(flux[i+1]-flux[i]))/(wave[i+1]-wave[i]))
+            total=total+1440
+    fl = fl[:-1]
+    w = w[:-1]
 
-wavelengths = np.array(Xos) 
+    h = sp.h*10**7
+    c = sp.c
+    k = sp.k*10**7
+    pi = math.pi
+    def planck(wav, T):
+        a = 8*pi*h*c
+        b = h*c/(wav*k*T)
+        intensity = a/ ( (wav**5) * (np.exp(b) - 1.0) )
+        return intensity
+    wavelengths = np.array(Xos) 
+    intensity5000 = planck(wavelengths / 1e9, 5000.)
+    #Свертка кривой пропускания и кривой блеска
+    figur=plt.figure()
+    axe=figur.add_subplot(111)
+    axe.grid(True, which=u'major')   
+    axe.grid(True, which=u'minor')
+    figur.gca().set_xlabel(f'$\lambda(U),nm$' ,fontsize=14)
+    figur.gca().set_ylabel("$I_{0} / I$",fontsize=14)
+    gr=plt.plot(Xos, Yos , linestyle='-', marker=' ', color='k')
+    gr=plt.plot(w, fl, linestyle='-', marker=' ', color='k')
+    gr=plt.plot(Xos, Yos * fl , linestyle='-', marker=' ', color='k')
+    plt.show()
+    figur=plt.figure()
+    axe=figur.add_subplot(111)
+    axe.grid(True, which=u'major')   
+    axe.grid(True, which=u'minor')
+    figur.gca().set_xlabel(f'$\lambda(U),nm$' ,fontsize=14)
+    figur.gca().set_ylabel("$I_{0} / I$",fontsize=14)
+    gr=plt.plot(Xos, Yos * fl , linestyle='-', marker=' ', color='k')
+    plt.show()
+    #Спектр АЧТ при 5000 К
+    figur=plt.figure()
+    axe=figur.add_subplot(111)
+    axe.grid(True, which=u'major')   
+    axe.grid(True, which=u'minor')
+    figur.gca().set_xlabel(f'$\lambda(U),nm$' ,fontsize=14)
+    figur.gca().set_ylabel(r'$\rho$',fontsize=14)
+    plt.plot(Xos, intensity5000, 'g-') # 5000K green line
+    plt.show()
+    #Верстаем первую светку и спектр АЧТ
+    figur=plt.figure()
+    axe=figur.add_subplot(111)
+    axe.grid(True, which=u'major')   
+    axe.grid(True, which=u'minor')
+    figur.gca().set_xlabel(f'$\lambda(U),nm$' ,fontsize=14)
+    figur.gca().set_ylabel(r'$\rho$',fontsize=14)
+    gr=plt.plot(Xos, Yos * fl * intensity5000, linestyle='-', marker=' ', color='k')
+    
+    
+    def B_graph():
+    import matplotlib.pyplot as plt
+    import numpy as np
+    import math 
+    import scipy.constants as sp
+    w=B[236:,0]
+    fl=B[236:,1] / 100.0
+    Yos=[]
+    Xos=[]
+    j=0
+    x=0
+    total=0
+    for i in range(len(wave)-1):
+        x1=np.where(w<=wave[i])[0][-1]
+        x2=np.where(w<=wave[i+1])[0][-1]
+        x=x2-x1
+        for k in range(x1, x2):
+            Xos.append(w[k])
+            Yos.append(flux[i]+((Xos[-1]-wave[i])*(flux[i+1]-flux[i]))/(wave[i+1]-wave[i]))
+            total=total+1440
+    fl = fl[:-1]
+    w = w[:-1]
 
+    h = sp.h*10**7
+    c = sp.c
+    k = sp.k*10**7
+    pi = math.pi
+    def planck(wav, T):
+        a = 8*pi*h*c
+        b = h*c/(wav*k*T)
+        intensity = a/ ( (wav**5) * (np.exp(b) - 1.0) )
+        return intensity
+    wavelengths = np.array(Xos) 
+    intensity5000 = planck(wavelengths / 1e9, 5000.)
+    #Свертка кривой пропускания и кривой блеска
+    figur=plt.figure()
+    axe=figur.add_subplot(111)
+    axe.grid(True, which=u'major')   
+    axe.grid(True, which=u'minor')
+    figur.gca().set_xlabel(f'$\lambda(B),nm$' ,fontsize=14)
+    figur.gca().set_ylabel("$I_{0} / I$",fontsize=14)
+    gr=plt.plot(Xos, Yos , linestyle='-', marker=' ', color='k')
+    gr=plt.plot(w, fl, linestyle='-', marker=' ', color='k')
+    gr=plt.plot(Xos, Yos * fl , linestyle='-', marker=' ', color='k')
+    plt.show()
+    figur=plt.figure()
+    axe=figur.add_subplot(111)
+    axe.grid(True, which=u'major')   
+    axe.grid(True, which=u'minor')
+    figur.gca().set_xlabel(f'$\lambda(B),nm$' ,fontsize=14)
+    figur.gca().set_ylabel("$I_{0} / I$",fontsize=14)
+    gr=plt.plot(Xos, Yos * fl , linestyle='-', marker=' ', color='k')
+    plt.show()
+    #Спектр АЧТ при 5000 К
+    figur=plt.figure()
+    axe=figur.add_subplot(111)
+    axe.grid(True, which=u'major')   
+    axe.grid(True, which=u'minor')
+    figur.gca().set_xlabel(f'$\lambda(B),nm$' ,fontsize=14)
+    figur.gca().set_ylabel(r'$\rho$',fontsize=14)
+    plt.plot(Xos, intensity5000, 'g-') # 5000K green line
+    plt.show()
+    #Верстаем первую светку и спектр АЧТ
+    figur=plt.figure()
+    axe=figur.add_subplot(111)
+    axe.grid(True, which=u'major')   
+    axe.grid(True, which=u'minor')
+    figur.gca().set_xlabel(f'$\lambda(B),nm$' ,fontsize=14)
+    figur.gca().set_ylabel(r'$\rho$',fontsize=14)
+    gr=plt.plot(Xos, Yos * fl * intensity5000, linestyle='-', marker=' ', color='k')
+    
+    
+    def V_graph():
+    import matplotlib.pyplot as plt
+    import numpy as np
+    import math 
+    import scipy.constants as sp
+    w=V[236:,0]
+    fl=V[236:,1] / 100.0
+    Yos=[]
+    Xos=[]
+    j=0
+    x=0
+    total=0
+    for i in range(len(wave)-1):
+        x1=np.where(w<=wave[i])[0][-1]
+        x2=np.where(w<=wave[i+1])[0][-1]
+        x=x2-x1
+        for k in range(x1, x2):
+            Xos.append(w[k])
+            Yos.append(flux[i]+((Xos[-1]-wave[i])*(flux[i+1]-flux[i]))/(wave[i+1]-wave[i]))
+            total=total+1440
+    fl = fl[:-1]
+    w = w[:-1]
 
-intensity5000 = planck(wavelengths / 1e9, 5000.)
-
-
-
-plt.plot(Xos, intensity5000, 'g-') # 5000K green line
-
-
-# show the plot
-plt.show()
-#In[4]
-figur=plt.figure()
-axe=figur.add_subplot(111)
-axe.grid(True, which=u'major')   
-axe.grid(True, which=u'minor')
-figur.gca().set_xlabel(f'$\lambda(U/B/V),\AA$' ,fontsize=14)
-figur.gca().set_ylabel(u"pot, erg/sm $^2$ /c ",fontsize=14)
-# gr=plt.plot(Xos, Yos , linestyle='-', marker=' ', color='k')
-# gr=plt.plot(w, fl, linestyle='-', marker=' ', color='k')
-# gr=plt.plot(Xos, Yos * fl , linestyle='-', marker=' ', color='k')
-# gr=plt.plot(Xos, Yos * fl * intensity5000, linestyle='-', marker=' ', color='k')
-plt.show()
-gr=plt.plot(Xos, Yos * fl , linestyle='-', marker=' ', color='k')
-gr=plt.plot(Xos, intensity5000, linestyle='-', marker=' ', color='k')
-gr=plt.plot(Xos, Yos * fl * intensity5000, linestyle='-', marker=' ', color='k')
+    h = sp.h*10**7
+    c = sp.c
+    k = sp.k*10**7
+    pi = math.pi
+    def planck(wav, T):
+        a = 8*pi*h*c
+        b = h*c/(wav*k*T)
+        intensity = a/ ( (wav**5) * (np.exp(b) - 1.0) )
+        return intensity
+    wavelengths = np.array(Xos) 
+    intensity5000 = planck(wavelengths / 1e9, 5000.)
+    #Свертка кривой пропускания и кривой блеска
+    figur=plt.figure()
+    axe=figur.add_subplot(111)
+    axe.grid(True, which=u'major')   
+    axe.grid(True, which=u'minor')
+    figur.gca().set_xlabel(f'$\lambda(V),nm$' ,fontsize=14)
+    figur.gca().set_ylabel("$I_{0} / I$",fontsize=14)
+    gr=plt.plot(Xos, Yos , linestyle='-', marker=' ', color='k')
+    gr=plt.plot(w, fl, linestyle='-', marker=' ', color='k')
+    gr=plt.plot(Xos, Yos * fl , linestyle='-', marker=' ', color='k')
+    plt.show()
+    figur=plt.figure()
+    axe=figur.add_subplot(111)
+    axe.grid(True, which=u'major')   
+    axe.grid(True, which=u'minor')
+    figur.gca().set_xlabel(f'$\lambda(V),nm$' ,fontsize=14)
+    figur.gca().set_ylabel("$I_{0} / I$",fontsize=14)
+    gr=plt.plot(Xos, Yos * fl , linestyle='-', marker=' ', color='k')
+    plt.show()
+    #Спектр АЧТ при 5000 К
+    figur=plt.figure()
+    axe=figur.add_subplot(111)
+    axe.grid(True, which=u'major')   
+    axe.grid(True, which=u'minor')
+    figur.gca().set_xlabel(f'$\lambda(V),nm$' ,fontsize=14)
+    figur.gca().set_ylabel(r'$\rho$',fontsize=14)
+    plt.plot(Xos, intensity5000, 'g-') # 5000K green line
+    plt.show()
+    #Верстаем первую светку и спектр АЧТ
+    figur=plt.figure()
+    axe=figur.add_subplot(111)
+    axe.grid(True, which=u'major')   
+    axe.grid(True, which=u'minor')
+    figur.gca().set_xlabel(f'$\lambda(V),nm$' ,fontsize=14)
+    figur.gca().set_ylabel(r'$\rho$',fontsize=14)
+    gr=plt.plot(Xos, Yos * fl * intensity5000, linestyle='-', marker=' ', color='k')
+    
+    
+    U_graph()
+    B_graph()
+    V_graph()
+    
+    
