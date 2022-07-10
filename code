@@ -79,6 +79,18 @@ def U_graph():
     figur.gca().set_xlabel(f'$\lambda(U),nm$' ,fontsize=14)
     figur.gca().set_ylabel(r'$\rho$',fontsize=14)
     gr=plt.plot(Xos, Yos * fl * intensity5000, linestyle='-', marker=' ', color='k')
+    conv = Yos * fl* intensity5000
+    
+    f_r=open('text_U.txt', 'w')#открытие файла на запись
+    f_r.write('text\n')# запись в файл текста text
+    j=0
+    #цикл, записывающий массив wl в первый столбец, ff - во второй
+    for j in range(len(Xos)):
+        f_r.write(str(Xos[j])+' '+str(conv[j]/ 1e10)+'\n')
+    f_r.close()#закрываем файл
+    print('line(erg * cm^-3): ', np.trapz(conv[8:199:], wavelengths[8:199:]*1e7))  #Интегральная плотность энергии равновесного излучения 
+    print('afer line(erg * cm^-3): ', np.trapz(conv[198::], wavelengths[198::]*1e7,))
+
     
     
     def B_graph():
@@ -151,6 +163,17 @@ def U_graph():
     figur.gca().set_xlabel(f'$\lambda(B),nm$' ,fontsize=14)
     figur.gca().set_ylabel(r'$\rho$',fontsize=14)
     gr=plt.plot(Xos, Yos * fl * intensity5000, linestyle='-', marker=' ', color='k')
+    conv = Yos * fl* intensity5000
+    
+    f_r=open('text_B.txt', 'w')#открытие файла на запись
+    f_r.write('text\n')# запись в файл текста text
+    j=0
+    #цикл, записывающий массив wl в первый столбец, ff - во второй
+    for j in range(len(Xos)):
+        f_r.write(str(Xos[j])+' '+str(conv[j]/ 1e10)+'\n')
+    f_r.close()#закрываем файл
+    print('line(erg * cm^-3): ', np.trapz(conv[109:437:], wavelengths[109:437:]*1e7))  #Интегральная плотность энергии равновесного излучения 
+    print('afer line(erg * cm^-3): ', np.trapz(conv[436::], wavelengths[436::]*1e7,))
     
     
     def V_graph():
@@ -223,6 +246,17 @@ def U_graph():
     figur.gca().set_xlabel(f'$\lambda(V),nm$' ,fontsize=14)
     figur.gca().set_ylabel(r'$\rho$',fontsize=14)
     gr=plt.plot(Xos, Yos * fl * intensity5000, linestyle='-', marker=' ', color='k')
+    conv = Yos * fl* intensity5000
+    
+    f_r=open('text_V.txt', 'w')#открытие файла на запись
+    f_r.write('text\n')# запись в файл текста text
+    j=0
+    #цикл, записывающий массив wl в первый столбец, ff - во второй
+    for j in range(len(Xos)):
+        f_r.write(str(Xos[j])+' '+str(conv[j]/ 1e10)+'\n')
+    f_r.close()#закрываем файл
+    print('line(erg * cm^-3): ', np.trapz(conv[287:628:], wavelengths[287:628:]*1e7))  #Интегральная плотность энергии равновесного излучения 
+    print('afer line(erg * cm^-3): ', np.trapz(conv[627::], wavelengths[627::]*1e7,))
     
     
     U_graph()
