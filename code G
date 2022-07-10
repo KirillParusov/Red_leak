@@ -4,10 +4,18 @@ from scipy.constants import pi
 from scipy.constants import h
 from scipy.constants import c
 import math
+import os
 cam=np.loadtxt('C:/Users/Пользователь/Desktop/задача/camera_rc600.txt')
 B=np.loadtxt('C:/Users/Пользователь/Desktop/задача/B_rc600.txt')
 U=np.loadtxt('C:/Users/Пользователь/Desktop/задача/U_rc600.txt')
 V=np.loadtxt('C:/Users/Пользователь/Desktop/задача/V_rc600.txt')
+path = "C:/Users/Пользователь/Desktop/задача/YosflADB.txt"
+try:
+    os.remove(path)
+    print("YosflADB.txt удален.")
+except IOError:
+    print("Удалять нечего.")
+    
 mas=[U,B,V]
 wave=cam[18:,0]
 flux=cam[18:,1]/100.0
@@ -17,9 +25,10 @@ kk=1.380649e-16
 T=5000.
 e=math.e
 ADB=[]
+total=1
 print("1) U \n2) B \n3) V")
 def planck(wav, T):
-    a = 8*pi*hp*c
+    a = 2*pi*hp*c**2
     b = hp*c/(wav*kk*T)
     intensity = a/ ( (wav**5) * (np.exp(b) - 1.0) )
     return intensity
@@ -42,36 +51,74 @@ for z in mas:
     w=w[:-1]        
     wavelengths = np.array(Xos) 
     ADB = planck(wavelengths / 1e9, T)
-
+    intense=np.array(Yos*fl*ADB)
+    www=np.array(Xos)/1e9
+    #f_r=open(YosflADB, 'w')
+    #f_r=open("YosflADB.txt", "w")
+    with open("C:/Users/Пользователь/Desktop/задача/YosflADB.txt","a+") as file:
+        file.write('U,B,V\n')  # запись в файл текста text
+        #j=0
+    #цикл, записывающий массив wl в первый столбец, ff - во второй
+        for j in range(len(Xos)):
+            file.write(str(Xos[j])+' '+str(intense[j])+'\n')
+        #f_r.close()    #закрываем файл
+    print('\nCвертка кривой пропукания и кривой блеска')
     figur=plt.figure()
     axe=figur.add_subplot(111)
     axe.grid(True, which=u'major')   
     axe.grid(True, which=u'minor')
     figur.gca().set_xlabel(r'$\lambda,\AA$',fontsize=14)
-    figur.gca().set_ylabel(u"pot, erg/sm $^2$ /c",fontsize=14)
+    #figur.gca().set_ylabel(u"pot, erg/sm $^2$ /c",fontsize=14)
+    figur.gca().set_ylabel("$I_{0} / I$",fontsize=14)
     gr=plt.plot(w, fl, linestyle='-', marker=' ', color='k')
     gr=plt.plot(Xos, Yos*fl, linestyle='-', marker=' ', color='k')
     gr=plt.plot(Xos, Yos, linestyle='-', marker=' ', color='k')
     plt.show()
+    figur=plt.figure()
+    axe=figur.add_subplot(111)
+    axe.grid(True, which=u'major')   
+    axe.grid(True, which=u'minor')
+    figur.gca().set_xlabel(f'$\lambda,nm$' ,fontsize=14)
+    figur.gca().set_ylabel("$I_{0} / I$",fontsize=14)
     gr=plt.plot(Xos, Yos*fl, linestyle='-', marker=' ', color='k')
     plt.show()
+    print('Cпектр АЧТ')
+    figur=plt.figure()
+    axe=figur.add_subplot(111)
+    axe.grid(True, which=u'major')   
+    axe.grid(True, which=u'minor')
+    figur.gca().set_xlabel(f'$\lambda,nm$' ,fontsize=14)
+    figur.gca().set_ylabel(r'$\rho$',fontsize=14)
     gr=plt.plot(Xos, ADB, linestyle='-', marker=' ', color='k')
     plt.show()
+    print('Свертка первой свертки и спектра АЧТ')
+    figur=plt.figure()
+    axe=figur.add_subplot(111)
+    axe.grid(True, which=u'major')   
+    axe.grid(True, which=u'minor')
+    figur.gca().set_xlabel(f'$\lambda,nm$' ,fontsize=14)
+    figur.gca().set_ylabel(r'$\rho$',fontsize=14)
     gr=plt.plot(Xos, Yos * fl * ADB, linestyle='-', marker=' ', color='k')
     plt.show()
-# wavelengths = np.array(Xos) 
-
-# ADB = planck(wavelengths / 1e9, T)
-
-# figur=plt.figure()
-# axe=figur.add_subplot(111)
-# axe.grid(True, which=u'major')   
-# axe.grid(True, which=u'minor')
-# figur.gca().set_xlabel(r'$\lambda,\AA$',fontsize=14)
-# figur.gca().set_ylabel(u"pot, erg/sm $^2$ /c",fontsize=14)
-# gr=plt.plot(Xos, Yos * fl , linestyle='-', marker=' ', color='k')
-# plt.show()
-# gr=plt.plot(Xos, ADB, linestyle='-', marker=' ', color='k')
-# plt.show()
-# gr=plt.plot(Xos, Yos * fl * ADB, linestyle='-', marker=' ', color='k')
-# plt.show()
+    if total==1:
+        result=np.trapz((Yos * fl * ADB)[5:198], www[5:198])
+        other=np.trapz((Yos * fl * ADB)[197:1428], www[197:1428])
+        leak=(other/result)*100
+        print('Полоса U: ',result,' эрг/с*см^2')
+        print('Остальное U:',other,' эрг/с*см^2')
+        print('Утечка U:' ,leak, ' %')
+    elif total==2:
+        result=np.trapz((Yos * fl * ADB)[89:462], www[89:462])
+        other=np.trapz((Yos * fl * ADB)[461:1428], www[461:1428])
+        leak=(other/result)*100
+        print('Полоса B: ',result,' эрг/с*см^2')
+        print('Остальное B:',other,' эрг/с*см^2')
+        print('Утечка B:',leak,' %')
+    elif total==3:
+        result=np.trapz((Yos * fl * ADB)[255:626], www[255:626])
+        other=np.trapz((Yos * fl * ADB)[625:1428], www[625:1428])
+        leak=(other/result)*100
+        print('Полоса V: ',result,' эрг/с*см^2')
+        print('Остальное V:',other,' эрг/с*см^2')
+        print('Утечка V:',leak, ' %')
+    total+=1
