@@ -37,13 +37,13 @@ def U_graph():
     k = sp.k*10**7
     pi = math.pi
     def planck(wav, T):
-        a = 8*pi*h*c
+        a = 2*pi*h*c**2
         b = h*c/(wav*k*T)
         intensity = a/ ( (wav**5) * (np.exp(b) - 1.0) )
         return intensity
     wavelengths = np.array(Xos) 
     intensity5000 = planck(wavelengths / 1e9, 5000.)
-    #Свертка кривой пропускания и кривой блеска
+    print('Свертка кривой пропускания и кривой блеска')
     figur=plt.figure()
     axe=figur.add_subplot(111)
     axe.grid(True, which=u'major')   
@@ -62,7 +62,7 @@ def U_graph():
     figur.gca().set_ylabel("$I_{0} / I$",fontsize=14)
     gr=plt.plot(Xos, Yos * fl , linestyle='-', marker=' ', color='k')
     plt.show()
-    #Спектр АЧТ при 5000 К
+    print('Спектр АЧТ при 5000 К')
     figur=plt.figure()
     axe=figur.add_subplot(111)
     axe.grid(True, which=u'major')   
@@ -71,7 +71,7 @@ def U_graph():
     figur.gca().set_ylabel(r'$\rho$',fontsize=14)
     plt.plot(Xos, intensity5000, 'g-') # 5000K green line
     plt.show()
-    #Верстаем первую светку и спектр АЧТ
+    print('Верстаем первую светку и спектр АЧТ')
     figur=plt.figure()
     axe=figur.add_subplot(111)
     axe.grid(True, which=u'major')   
@@ -88,12 +88,14 @@ def U_graph():
     for j in range(len(Xos)):
         f_r.write(str(Xos[j])+' '+str(conv[j]/ 1e10)+'\n')
     f_r.close()#закрываем файл
-    print('line(erg * cm^-3): ', np.trapz(conv[8:199:], wavelengths[8:199:]*1e7))  #Интегральная плотность энергии равновесного излучения 
-    print('afer line(erg * cm^-3): ', np.trapz(conv[198::], wavelengths[198::]*1e7,))
+    print('line(erg * cm^-2 * c^-1): ', np.trapz(conv[8:199:], wavelengths[8:199:]*1e-9))  #Интегральная плотность энергии равновесного излучения 
+    print('afer line(erg * cm^-2 * c^-1): ', np.trapz(conv[198::], wavelengths[198::]*1e-9))
+    print('Red leak: ', ( np.trapz(conv[198::], wavelengths[198::]*1e-9) / np.trapz(conv[8:199:], wavelengths[8:199:]*1e-9)))
+    
 
     
     
-    def B_graph():
+   def B_graph():
     import matplotlib.pyplot as plt
     import numpy as np
     import math 
@@ -121,13 +123,13 @@ def U_graph():
     k = sp.k*10**7
     pi = math.pi
     def planck(wav, T):
-        a = 8*pi*h*c
+        a = 2*pi*h*c**2
         b = h*c/(wav*k*T)
         intensity = a/ ( (wav**5) * (np.exp(b) - 1.0) )
         return intensity
     wavelengths = np.array(Xos) 
     intensity5000 = planck(wavelengths / 1e9, 5000.)
-    #Свертка кривой пропускания и кривой блеска
+    print('Свертка кривой пропускания и кривой блеска')
     figur=plt.figure()
     axe=figur.add_subplot(111)
     axe.grid(True, which=u'major')   
@@ -146,7 +148,7 @@ def U_graph():
     figur.gca().set_ylabel("$I_{0} / I$",fontsize=14)
     gr=plt.plot(Xos, Yos * fl , linestyle='-', marker=' ', color='k')
     plt.show()
-    #Спектр АЧТ при 5000 К
+    print('Спектр АЧТ при 5000 К')
     figur=plt.figure()
     axe=figur.add_subplot(111)
     axe.grid(True, which=u'major')   
@@ -155,7 +157,7 @@ def U_graph():
     figur.gca().set_ylabel(r'$\rho$',fontsize=14)
     plt.plot(Xos, intensity5000, 'g-') # 5000K green line
     plt.show()
-    #Верстаем первую светку и спектр АЧТ
+    print('Верстаем первую светку и спектр АЧТ')
     figur=plt.figure()
     axe=figur.add_subplot(111)
     axe.grid(True, which=u'major')   
@@ -172,8 +174,9 @@ def U_graph():
     for j in range(len(Xos)):
         f_r.write(str(Xos[j])+' '+str(conv[j]/ 1e10)+'\n')
     f_r.close()#закрываем файл
-    print('line(erg * cm^-3): ', np.trapz(conv[109:437:], wavelengths[109:437:]*1e7))  #Интегральная плотность энергии равновесного излучения 
-    print('afer line(erg * cm^-3): ', np.trapz(conv[436::], wavelengths[436::]*1e7,))
+    print('line(erg * cm^-2 * c^-1): ', np.trapz(conv[109:437:], wavelengths[109:437:]*1e-9))  #Интегральная плотность энергии равновесного излучения 
+    print('afer line(erg * cm^-2 * c^-1): ', np.trapz(conv[436::], wavelengths[436::]*1e-9,))
+    print('Red leak: ', ( np.trapz(conv[436::], wavelengths[436::]*1e-9) / np.trapz(conv[109:437:], wavelengths[109:437:]*1e-9)))
     
     
     def V_graph():
@@ -204,13 +207,13 @@ def U_graph():
     k = sp.k*10**7
     pi = math.pi
     def planck(wav, T):
-        a = 8*pi*h*c
+        a = 2*pi*h*c**2
         b = h*c/(wav*k*T)
         intensity = a/ ( (wav**5) * (np.exp(b) - 1.0) )
         return intensity
     wavelengths = np.array(Xos) 
     intensity5000 = planck(wavelengths / 1e9, 5000.)
-    #Свертка кривой пропускания и кривой блеска
+    print('Свертка кривой пропускания и кривой блеска')
     figur=plt.figure()
     axe=figur.add_subplot(111)
     axe.grid(True, which=u'major')   
@@ -229,7 +232,7 @@ def U_graph():
     figur.gca().set_ylabel("$I_{0} / I$",fontsize=14)
     gr=plt.plot(Xos, Yos * fl , linestyle='-', marker=' ', color='k')
     plt.show()
-    #Спектр АЧТ при 5000 К
+    print('Спектр АЧТ при 5000 К')
     figur=plt.figure()
     axe=figur.add_subplot(111)
     axe.grid(True, which=u'major')   
@@ -238,7 +241,7 @@ def U_graph():
     figur.gca().set_ylabel(r'$\rho$',fontsize=14)
     plt.plot(Xos, intensity5000, 'g-') # 5000K green line
     plt.show()
-    #Верстаем первую светку и спектр АЧТ
+    print('Верстаем первую светку и спектр АЧТ')
     figur=plt.figure()
     axe=figur.add_subplot(111)
     axe.grid(True, which=u'major')   
@@ -255,8 +258,10 @@ def U_graph():
     for j in range(len(Xos)):
         f_r.write(str(Xos[j])+' '+str(conv[j]/ 1e10)+'\n')
     f_r.close()#закрываем файл
-    print('line(erg * cm^-3): ', np.trapz(conv[287:628:], wavelengths[287:628:]*1e7))  #Интегральная плотность энергии равновесного излучения 
-    print('afer line(erg * cm^-3): ', np.trapz(conv[627::], wavelengths[627::]*1e7,))
+    print('line(erg * cm^-2 * c^-1): ', np.trapz(conv[287:628:], wavelengths[287:628:]*1e-9))  #Интегральная плотность энергии равновесного излучения 
+    print('afer line(erg * cm^-2 * c^-1): ', np.trapz(conv[627::], wavelengths[627::]*1e-9,))
+    print('Red leak: ', ( np.trapz(conv[627::], wavelengths[627::]*1e-9) / np.trapz(conv[287:628:], wavelengths[287:628:]*1e-9)))
+    
     
     
     U_graph()
