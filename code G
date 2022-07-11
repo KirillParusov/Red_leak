@@ -10,11 +10,11 @@ B=np.loadtxt('C:/Users/Пользователь/Desktop/задача/B_rc600.txt
 U=np.loadtxt('C:/Users/Пользователь/Desktop/задача/U_rc600.txt')
 V=np.loadtxt('C:/Users/Пользователь/Desktop/задача/V_rc600.txt')
 path = "C:/Users/Пользователь/Desktop/задача/YosflADB.txt"
-try:
-    os.remove(path)
-    print("YosflADB.txt удален.")
-except IOError:
-    print("Удалять нечего.")
+# try:
+#     os.remove(path)
+#     print("YosflADB.txt удален.\n")
+# except IOError:
+#     print("Удалять нечего.\n")
     
 mas=[U,B,V]
 wave=cam[18:,0]
@@ -22,103 +22,186 @@ flux=cam[18:,1]/100.0
 hp=h*10**7
 cc=c*100.
 kk=1.380649e-16
+
+a=2 # выбор режима 1) для графиков свертки 2) для графиков утечки от температуры
+
 T=5000.
+LosU=[]
+LosB=[]
+LosV=[]
+Tos=[]
+Tbreak=0
 e=math.e
-ADB=[]
-total=1
-print("1) U \n2) B \n3) V")
 def planck(wav, T):
     a = 2*pi*hp*c**2
     b = hp*c/(wav*kk*T)
     intensity = a/ ( (wav**5) * (np.exp(b) - 1.0) )
     return intensity
+print("1) U \n2) B \n3) V")
+if a==2:
+    print('T, K', '\t','Утечка U, эрг/с*см^2','\t', 'Утечка B, эрг/с*см^2','\t', 'Утечка V, эрг/с*см^2')
+while T>=3000:
+    if Tbreak==1:
+        break
+    ADB=[]
+    total=1
 
-for z in mas:
-    w=z[236:,0]
-    fl=z[236:,1]/100.0
-    Yos=[]
-    Xos=[]
-    j=0
-    x=0
-    for i in range(len(wave)-1):
-        x1=np.where(w<wave[i])[0][-1]
-        x2=np.where(w<=wave[i+1])[0][-1]
-        x=x2-x1
-        for k in range(x1,x2):
-            Xos.append(w[k])
-            Yos.append(flux[i]+((Xos[-1]-wave[i])*(flux[i+1]-flux[i]))/(wave[i+1]-wave[i]))
-    fl=fl[:-1]
-    w=w[:-1]        
-    wavelengths = np.array(Xos) 
-    ADB = planck(wavelengths / 1e9, T)
-    intense=np.array(Yos*fl*ADB)
-    www=np.array(Xos)/1e9
+    for z in mas:
+        w=z[236:,0]
+        fl=z[236:,1]/100.0
+        Yos=[]
+        Xos=[]
+        j=0
+        x=0
+        for i in range(len(wave)-1):
+            x1=np.where(w<wave[i])[0][-1]
+            x2=np.where(w<=wave[i+1])[0][-1]
+            x=x2-x1
+            for k in range(x1,x2):
+                Xos.append(w[k])
+                Yos.append(flux[i]+((Xos[-1]-wave[i])*(flux[i+1]-flux[i]))/(wave[i+1]-wave[i]))
+        fl=fl[:-1]
+        w=w[:-1]        
+        wavelengths = np.array(Xos) 
+        ADB = planck(wavelengths / 1e9, T)
+        intense=np.array(Yos*fl*ADB)
+        www=np.array(Xos)/1e9
     #f_r=open(YosflADB, 'w')
     #f_r=open("YosflADB.txt", "w")
-    with open("C:/Users/Пользователь/Desktop/задача/YosflADB.txt","a+") as file:
-        file.write('U,B,V\n')  # запись в файл текста text
-        #j=0
-    #цикл, записывающий массив wl в первый столбец, ff - во второй
-        for j in range(len(Xos)):
-            file.write(str(Xos[j])+' '+str(intense[j])+'\n')
+    # with open("C:/Users/Пользователь/Desktop/задача/YosflADB.txt","a+") as file:
+    #     file.write('U,B,V\n')  # запись в файл текста text
+    #     #j=0
+    # #цикл, записывающий массив wl в первый столбец, ff - во второй
+    #     for j in range(len(Xos)):
+    #         file.write(str(Xos[j])+' '+str(intense[j])+'\n')
         #f_r.close()    #закрываем файл
-    print('\nCвертка кривой пропукания и кривой блеска')
+        if a==1:
+            print('\nCвертка кривой пропукания и кривой блеска')
+            figur=plt.figure()
+            axe=figur.add_subplot(111)
+            axe.grid(True, which=u'major')   
+            axe.grid(True, which=u'minor')
+            figur.gca().set_xlabel(r'$\lambda,\AA$',fontsize=14)
+            #figur.gca().set_ylabel(u"pot, erg/sm $^2$ /c",fontsize=14)
+            figur.gca().set_ylabel("$I_{0} / I$",fontsize=14)
+            gr=plt.plot(w, fl, linestyle='-', marker=' ', color='k')
+            gr=plt.plot(Xos, Yos*fl, linestyle='-', marker=' ', color='k')
+            gr=plt.plot(Xos, Yos, linestyle='-', marker=' ', color='k')
+            plt.show()
+            figur=plt.figure()
+            axe=figur.add_subplot(111)
+            axe.grid(True, which=u'major')   
+            axe.grid(True, which=u'minor')
+            figur.gca().set_xlabel(f'$\lambda,nm$' ,fontsize=14)
+            figur.gca().set_ylabel("$I_{0} / I$",fontsize=14)
+            gr=plt.plot(Xos, Yos*fl, linestyle='-', marker=' ', color='k')
+            plt.show()
+            print('Cпектр АЧТ')
+            figur=plt.figure()
+            axe=figur.add_subplot(111)
+            axe.grid(True, which=u'major')   
+            axe.grid(True, which=u'minor')
+            figur.gca().set_xlabel(f'$\lambda,nm$' ,fontsize=14)
+            figur.gca().set_ylabel(r'$\rho$',fontsize=14)
+            gr=plt.plot(Xos, ADB, linestyle='-', marker=' ', color='k')
+            plt.show()
+            print('Свертка первой свертки и спектра АЧТ')
+            figur=plt.figure()
+            axe=figur.add_subplot(111)
+            axe.grid(True, which=u'major')   
+            axe.grid(True, which=u'minor')
+            figur.gca().set_xlabel(f'$\lambda,nm$' ,fontsize=14)
+            figur.gca().set_ylabel(r'$\rho$',fontsize=14)
+            gr=plt.plot(Xos, Yos * fl * ADB, linestyle='-', marker=' ', color='k')
+            plt.show()
+            if total==1:
+                result=np.trapz((Yos * fl * ADB)[5:198], www[5:198])
+                other=np.trapz((Yos * fl * ADB)[197:1428], www[197:1428])
+                leak=(other/result)*100
+                print('Полоса U: ',result,' эрг/с*см^2')
+                print('Остальное U:',other,' эрг/с*см^2')
+                print('Утечка U:' ,leak, ' %')
+            elif total==2:
+                result=np.trapz((Yos * fl * ADB)[89:462], www[89:462])
+                other=np.trapz((Yos * fl * ADB)[461:1428], www[461:1428])
+                leak=(other/result)*100
+                print('Полоса B: ',result,' эрг/с*см^2')
+                print('Остальное B:',other,' эрг/с*см^2')
+                print('Утечка B:',leak,' %')
+            elif total==3:
+                result=np.trapz((Yos * fl * ADB)[255:626], www[255:626])
+                other=np.trapz((Yos * fl * ADB)[625:1428], www[625:1428])
+                leak=(other/result)*100
+                print('Полоса V: ',result,' эрг/с*см^2')
+                print('Остальное V:',other,' эрг/с*см^2')
+                print('Утечка V:',leak, ' %')
+                Tbreak=1 # для выхода из цикла while
+            total+=1
+        if a==2:
+            if total==1:
+                result=np.trapz((Yos * fl * ADB)[5:198], www[5:198])
+                other=np.trapz((Yos * fl * ADB)[197:1428], www[197:1428])
+                leak=(other/result)*100
+                LosU.append(leak)
+                if (int(T) % 100) == 0:
+                    print(int(T), end='\t')
+                    print(leak, end='\t')
+            elif total==2:
+                result=np.trapz((Yos * fl * ADB)[89:462], www[89:462])
+                other=np.trapz((Yos * fl * ADB)[461:1428], www[461:1428])
+                leak=(other/result)*100
+                LosB.append(leak)
+                if (int(T) % 100) == 0:
+                    print(leak, end='\t')
+            elif total==3:
+                result=np.trapz((Yos * fl * ADB)[255:626], www[255:626])
+                other=np.trapz((Yos * fl * ADB)[625:1428], www[625:1428])
+                leak=(other/result)*100
+                LosV.append(leak)
+                if (int(T) % 100) == 0:
+                    print(leak, end='\n')
+            total+=1
+    Tos.append(T)
+    T-=1
+if a==2:
     figur=plt.figure()
     axe=figur.add_subplot(111)
-    axe.grid(True, which=u'major')   
+    axe.grid(True, which=u'major')
     axe.grid(True, which=u'minor')
-    figur.gca().set_xlabel(r'$\lambda,\AA$',fontsize=14)
-    #figur.gca().set_ylabel(u"pot, erg/sm $^2$ /c",fontsize=14)
-    figur.gca().set_ylabel("$I_{0} / I$",fontsize=14)
-    gr=plt.plot(w, fl, linestyle='-', marker=' ', color='k')
-    gr=plt.plot(Xos, Yos*fl, linestyle='-', marker=' ', color='k')
-    gr=plt.plot(Xos, Yos, linestyle='-', marker=' ', color='k')
+    plt.gca().invert_xaxis()
+    figur.gca().set_xlabel(f'T,K' ,fontsize=14)
+    figur.gca().set_ylabel(r'Leak(%)',fontsize=14)
+    gr=plt.plot(Tos, LosU, linestyle='-', marker=' ', color='k')
+    gr=plt.plot(Tos, LosB, linestyle='-', marker=' ', color='k')
+    gr=plt.plot(Tos, LosV, linestyle='-', marker=' ', color='k')
     plt.show()
+
     figur=plt.figure()
     axe=figur.add_subplot(111)
-    axe.grid(True, which=u'major')   
+    axe.grid(True, which=u'major')
     axe.grid(True, which=u'minor')
-    figur.gca().set_xlabel(f'$\lambda,nm$' ,fontsize=14)
-    figur.gca().set_ylabel("$I_{0} / I$",fontsize=14)
-    gr=plt.plot(Xos, Yos*fl, linestyle='-', marker=' ', color='k')
+    plt.gca().invert_xaxis()
+    figur.gca().set_xlabel(f'T,K' ,fontsize=14)
+    figur.gca().set_ylabel(r'Leak(%)',fontsize=14)
+    gr=plt.plot(Tos, LosU, linestyle='-', marker=' ', color='k')
     plt.show()
-    print('Cпектр АЧТ')
+
     figur=plt.figure()
     axe=figur.add_subplot(111)
-    axe.grid(True, which=u'major')   
+    axe.grid(True, which=u'major')
     axe.grid(True, which=u'minor')
-    figur.gca().set_xlabel(f'$\lambda,nm$' ,fontsize=14)
-    figur.gca().set_ylabel(r'$\rho$',fontsize=14)
-    gr=plt.plot(Xos, ADB, linestyle='-', marker=' ', color='k')
+    plt.gca().invert_xaxis()
+    figur.gca().set_xlabel(f'T,K' ,fontsize=14)
+    figur.gca().set_ylabel(r'Leak(%)',fontsize=14)
+    gr=plt.plot(Tos, LosB, linestyle='-', marker=' ', color='k')
     plt.show()
-    print('Свертка первой свертки и спектра АЧТ')
+
     figur=plt.figure()
     axe=figur.add_subplot(111)
-    axe.grid(True, which=u'major')   
+    axe.grid(True, which=u'major')
     axe.grid(True, which=u'minor')
-    figur.gca().set_xlabel(f'$\lambda,nm$' ,fontsize=14)
-    figur.gca().set_ylabel(r'$\rho$',fontsize=14)
-    gr=plt.plot(Xos, Yos * fl * ADB, linestyle='-', marker=' ', color='k')
+    plt.gca().invert_xaxis()
+    figur.gca().set_xlabel(f'T,K' ,fontsize=14)
+    figur.gca().set_ylabel(r'Leak(%)',fontsize=14)
+    gr=plt.plot(Tos, LosV, linestyle='-', marker=' ', color='k')
     plt.show()
-    if total==1:
-        result=np.trapz((Yos * fl * ADB)[5:198], www[5:198])
-        other=np.trapz((Yos * fl * ADB)[197:1428], www[197:1428])
-        leak=(other/result)*100
-        print('Полоса U: ',result,' эрг/с*см^2')
-        print('Остальное U:',other,' эрг/с*см^2')
-        print('Утечка U:' ,leak, ' %')
-    elif total==2:
-        result=np.trapz((Yos * fl * ADB)[89:462], www[89:462])
-        other=np.trapz((Yos * fl * ADB)[461:1428], www[461:1428])
-        leak=(other/result)*100
-        print('Полоса B: ',result,' эрг/с*см^2')
-        print('Остальное B:',other,' эрг/с*см^2')
-        print('Утечка B:',leak,' %')
-    elif total==3:
-        result=np.trapz((Yos * fl * ADB)[255:626], www[255:626])
-        other=np.trapz((Yos * fl * ADB)[625:1428], www[625:1428])
-        leak=(other/result)*100
-        print('Полоса V: ',result,' эрг/с*см^2')
-        print('Остальное V:',other,' эрг/с*см^2')
-        print('Утечка V:',leak, ' %')
-    total+=1
