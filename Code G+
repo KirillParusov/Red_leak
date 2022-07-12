@@ -10,15 +10,15 @@ B=np.loadtxt('C:/Users/Пользователь/Desktop/задача/B_rc600.txt
 U=np.loadtxt('C:/Users/Пользователь/Desktop/задача/U_rc600.txt')
 V=np.loadtxt('C:/Users/Пользователь/Desktop/задача/V_rc600.txt')
 path = "C:/Users/Пользователь/Desktop/задача/YosflADB.txt"
-M=np.loadtxt('C:/Users/Пользователь/Desktop/задача/giant/uka0i.dat')
+M=np.loadtxt('C:/Users/Пользователь/Desktop/задача/giant/ukm0v.dat')
 
 # try:
 #     os.remove(path)
 #     print("YosflADB.txt удален.\n")
 # except IOError:
 #     print("Удалять нечего.\n")   
-Mw=M[:,0]/10
-Mfl=M[:,1]
+Mw=M[366:1971,0]/10
+Mfl=M[366:1971,1]
 mas=[U,B,V]
 wave=cam[18:,0]
 flux=cam[18:,1]/100.0
@@ -40,13 +40,14 @@ def planck(wav,intense ):
     Myos=[]
     Mj=0
     Mx=0
-    for Mi in range(len(wav)-1):
-        Mx1=np.where(Mw<wav[i])[0][-1]
-        Mx2=np.where(Mw<=wav[i+1])[0][-1]
-        x=x2-x1
-        for Mk in range(x1,x2):
-            Mxos.append(w[Mk])
-            Myos.append(intense[i]+((Mxos[-1]-wav[i])*(intense[i+1]-intense[i]))/(wav[i+1]-wav[i]))
+    for Mi in range(len(wav)):
+        Mx1=np.where(Mw<=wav[Mi])[0][-1]
+        Mx2=np.where(Mw>wav[Mi])[0][0]
+        Mx=Mx2-Mx1
+        print(wav[Mi], Mx, Mw[Mx1], Mw[Mx2])
+        Mxos.append(wav[Mi])
+        Myos.append(Mfl[Mx1]+((wav[Mi]-Mw[Mx1])*(Mfl[Mx2]-Mfl[Mx1]))/(Mw[Mx2]-Mw[Mx1]))
+            
     # a = 2*pi*hp*c**2
     # b = hp*c/(wav*kk*T)
     # intensity = a/ ( (wav**5) * (np.exp(b) - 1.0) )
@@ -76,10 +77,13 @@ while T>=3000:
                 Xos.append(w[k])
                 Yos.append(flux[i]+((Xos[-1]-wave[i])*(flux[i+1]-flux[i]))/(wave[i+1]-wave[i]))
         fl=fl[:-1]
-        w=w[:-1]        
+        w=w[:-1] 
         wavelengths = np.array(Xos) 
         intense=np.array(Yos*fl)
         ADB,ADBx = planck(wavelengths, intense)
+        print(len(ADB),len(ADBx),len(Xos),len(intense))
+        # print(Mw)
+        # print(Xos)
         www=np.array(Xos)/1e9
     #f_r=open(YosflADB, 'w')
     #f_r=open("YosflADB.txt", "w")
