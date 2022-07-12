@@ -1,3 +1,4 @@
+# a=1 only
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.constants import pi
