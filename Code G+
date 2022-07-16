@@ -11,15 +11,19 @@ cam=np.loadtxt('C:/Users/Пользователь/Desktop/задача/camera_rc
 B=np.loadtxt('C:/Users/Пользователь/Desktop/задача/B_rc600.txt')
 U=np.loadtxt('C:/Users/Пользователь/Desktop/задача/U_rc600.txt')
 V=np.loadtxt('C:/Users/Пользователь/Desktop/задача/V_rc600.txt')
-path = "C:/Users/Пользователь/Desktop/задача/YosflADB.txt"
+R=np.loadtxt('C:/Users/Пользователь/Desktop/задача/R_rc600.txt')
+Vega=np.loadtxt('C:/Users/Пользователь/Desktop/задача/giant/uka0v.dat')
 
-mas=[U,B,V]
+mas=[U,B,V,R]
+vas=[V,R]
 wave=cam[18:,0]
 flux=cam[18:,1]/100.0
 hp=h*10**7
 cc=c*100.
 kk=1.380649e-16
-T=5000
+T=5000.
+Bos=[]
+Nasos=[]
     
 a=1 # выбор режима 1) для графиков свертки 2) для графиков утечки от температуры
 
@@ -36,6 +40,65 @@ def planck(wav,intense ):
             Mxos.append(wav[Mi])
             Myos.append(Mfl[Mx1]+((wav[Mi]-Mw[Mx1])*(Mfl[Mx2]-Mfl[Mx1]))/(Mw[Mx2]-Mw[Mx1]))
         return Myos,Mxos
+#Vega
+print("Vega")
+Mw=Vega[366:1971,0]/10
+Mfl=Vega[366:1971,1]
+print("1) V \n2) R")
+ADB=[]
+ADBx=[]
+vogal=1
+for vz in vas:
+    if vogal==2:
+        w=vz[:,0]
+        w=w[::-1]
+        fl=vz[:,1]/100.0
+        fl=fl[::-1]
+        w=w[17:]
+        fl=fl[17:]
+        wave=cam[19:,0]
+        flux=cam[19:,1]/100.0
+    else:
+        wave=cam[18:,0]
+        flux=cam[18:,1]/100.0
+        w=vz[236:,0]
+        fl=vz[236:,1]/100.0
+    Yos=[]
+    Xos=[]
+    j=0
+    x=0
+    for i in range(len(wave)-1):
+        x1=np.where(w<wave[i])[0][-1]
+        x2=np.where(w<=wave[i+1])[0][-1]
+        x=x2-x1
+        for k in range(x1,x2):
+            Xos.append(w[k])
+            Yos.append(flux[i]+((Xos[-1]-wave[i])*(flux[i+1]-flux[i]))/(wave[i+1]-wave[i]))
+    fl=fl[:-1]
+    w=w[:-1]
+    if vogal==2:
+        Xos.remove(1080.5)
+        Xos.remove(1060.5)
+        Xos.remove(1070.5)
+        Yos.pop(Xos.index(1060.5))
+        Yos.pop(Xos.index(1070.5))
+        Yos.pop(Xos.index(1080.5))
+    wavelengths = np.array(Xos) 
+    intense=np.array(Yos*fl)
+    ADB,ADBx = planck(wavelengths, intense)
+    www=np.array(Xos)/1e9
+    if vogal==1:
+        F_0V=np.trapz((Yos * fl * ADB), www)
+        print('Поток V:',F_0V,' эрг/с*см^2')
+    elif vogal==2:
+        F_0R=np.trapz((Yos * fl * ADB), www)
+        print('Поток R:',F_0R,' эрг/с*см^2')
+    vogal+=1   
+    
+def Color_Index(F_V,F_R):
+    color=-2.5*np.log10(F_V/F_0V)+2.5*np.log10(F_R/F_0R)
+    return color
+    
 
 for fileName in glob.glob('C:/Users/Пользователь/Desktop/задача/giant/*'):
     print('\n',fileName)
@@ -45,10 +108,11 @@ for fileName in glob.glob('C:/Users/Пользователь/Desktop/задач�
     LosU=[]
     LosB=[]
     LosV=[]
+    LosR=[]
     Tos=[]
     Tbreak=0
     e=math.e
-    print("1) U \n2) B \n3) V")
+    print("1) U \n2) B \n3) V \n4) R")
     if a==2:
         print('T, K', '\t','Утечка U, эрг/с*см^2','\t', 'Утечка B, эрг/с*см^2','\t', 'Утечка V, эрг/с*см^2')
     while T>=3000:
@@ -59,8 +123,20 @@ for fileName in glob.glob('C:/Users/Пользователь/Desktop/задач�
         total=1
 
         for z in mas:
-            w=z[236:,0]
-            fl=z[236:,1]/100.0
+            if total==4:
+                w=z[:,0]
+                w=w[::-1]
+                fl=z[:,1]/100.0
+                fl=fl[::-1]
+                w=w[17:]
+                fl=fl[17:]
+                wave=cam[19:,0]
+                flux=cam[19:,1]/100.0
+            else:
+                wave=cam[18:,0]
+                flux=cam[18:,1]/100.0
+                w=z[236:,0]
+                fl=z[236:,1]/100.0
             Yos=[]
             Xos=[]
             j=0
@@ -73,7 +149,17 @@ for fileName in glob.glob('C:/Users/Пользователь/Desktop/задач�
                     Xos.append(w[k])
                     Yos.append(flux[i]+((Xos[-1]-wave[i])*(flux[i+1]-flux[i]))/(wave[i+1]-wave[i]))
             fl=fl[:-1]
-            w=w[:-1] 
+            w=w[:-1]
+            if total==4:
+                Xos.remove(1080.5)
+                Xos.remove(1060.5)
+                Xos.remove(1070.5)
+                # print(Xos.index(1060.5))
+                # print(Xos.index(1070.5))
+                # print(Xos.index(1080.5))
+                Yos.pop(Xos.index(1060.5))
+                Yos.pop(Xos.index(1070.5))
+                Yos.pop(Xos.index(1080.5))
             wavelengths = np.array(Xos) 
             intense=np.array(Yos*fl)
             ADB,ADBx = planck(wavelengths, intense)
@@ -121,23 +207,39 @@ for fileName in glob.glob('C:/Users/Пользователь/Desktop/задач�
                     result=np.trapz((Yos * fl * ADB)[5:198], www[5:198])
                     other=np.trapz((Yos * fl * ADB)[197:1428], www[197:1428])
                     leak=(other/result)*100
-                    print('Полоса U: ',result,' эрг/с*см^2')
-                    print('Остальное U:',other,' эрг/с*см^2')
-                    print('Утечка U:' ,leak, ' %')
+                    # print('Полоса U: ',result,' эрг/с*см^2')
+                    # print('Остальное U:',other,' эрг/с*см^2')
+                    # print('Утечка U:' ,leak, ' %')
                 elif total==2:
                     result=np.trapz((Yos * fl * ADB)[89:462], www[89:462])
                     other=np.trapz((Yos * fl * ADB)[461:1428], www[461:1428])
                     leak=(other/result)*100
-                    print('Полоса B: ',result,' эрг/с*см^2')
-                    print('Остальное B:',other,' эрг/с*см^2')
-                    print('Утечка B:',leak,' %')
+                    dmleak=-2.5*np.log10(1-leak/100)
+                    Bos.append(dmleak)
+                    # print('Полоса B: ',result,' эрг/с*см^2')
+                    # print('Остальное B:',other,' эрг/с*см^2')
+                    print('Утечка B:',dmleak,' mag')
                 elif total==3:
                     result=np.trapz((Yos * fl * ADB)[255:626], www[255:626])
                     other=np.trapz((Yos * fl * ADB)[625:1428], www[625:1428])
                     leak=(other/result)*100
-                    print('Полоса V: ',result,' эрг/с*см^2')
-                    print('Остальное V:',other,' эрг/с*см^2')
-                    print('Утечка V:',leak, ' %')
+                    F_V=np.trapz((Yos * fl * ADB), www)
+                    # print('Полоса V: ',result,' эрг/с*см^2')
+                    # print('Остальное V:',other,' эрг/с*см^2')
+                    # print('Утечка V:',leak, ' %')
+                    # print('Поток V:',F_V,' эрг/с*см^2')
+                elif total==4:
+                    result=np.trapz((Yos * fl * ADB)[466:1310], www[466:1310])
+                    other=np.trapz((Yos * fl * ADB)[1310:1583], www[1310:1583])
+                    F_R=np.trapz((Yos * fl * ADB), www)
+                    leak=(other/result)*100
+                    # print('Полоса R: ',result,' эрг/с*см^2')
+                    # print('Остальное R:',other,' эрг/с*см^2')
+                    # print('Утечка R:',leak, ' %')
+                    # print('Поток R:',F_R,' эрг/с*см^2')
+                    C_I=Color_Index(F_V,F_R)
+                    Nasos.append(C_I)
+                    print('Показатель цвета V-R: ',C_I)
                     Tbreak=1 # для выхода из цикла while
                 total+=1
             if a==2:
@@ -208,3 +310,18 @@ for fileName in glob.glob('C:/Users/Пользователь/Desktop/задач�
         figur.gca().set_ylabel(r'Leak(%)',fontsize=14)
         gr=plt.plot(Tos, LosV, linestyle='-', marker=' ', color='k')
         plt.show()
+
+# график утечки от V-R
+figur=plt.figure()
+axe=figur.add_subplot(111)
+axe.grid(True, which=u'major')
+axe.grid(True, which=u'minor')
+figur.gca().set_xlabel(f'V-R' ,fontsize=14)
+figur.gca().set_ylabel(r'Leak, mag',fontsize=14)
+plt.title("Red leak vs V-R")
+Size=[10]*len(Bos)
+gr=plt.scatter(Nasos, Bos, Size, marker="*", c=Nasos, cmap="jet" )
+plt.colorbar()
+# gr=plt.plot(Nasos, Bos, linestyle='-', marker=' ', color='k')
+figur.savefig('C:/Users/Пользователь/Desktop/задача/graph.png', dpi=600)
+plt.show()
