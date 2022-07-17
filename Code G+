@@ -24,6 +24,7 @@ cc=c*100.
 kk=1.380649e-16
 T=5000.
 Bos=[]
+Uos=[]
 Nasos=[]
     
 a=1 # выбор режима 1) для графиков свертки 2) для графиков утечки от температуры
@@ -211,9 +212,11 @@ for fileName in glob.glob('C:/Users/Пользователь/Desktop/задач�
                     result=np.trapz((Yos * fl * ADB)[5:198], www[5:198])
                     other=np.trapz((Yos * fl * ADB)[197:1428], www[197:1428])
                     leak=(other/result)*100
+                    dmuleak=-2.5*np.log10(1-leak/100)
+                    Uos.append(dmuleak)
                     # print('Полоса U: ',result,' эрг/с*см^2')
                     # print('Остальное U:',other,' эрг/с*см^2')
-                    # print('Утечка U:' ,leak, ' %')
+                    print('Утечка U:' ,dmuleak, ' mag')
                 elif total==2:
                     result=np.trapz((Yos * fl * ADB)[89:462], www[89:462])
                     other=np.trapz((Yos * fl * ADB)[461:1428], www[461:1428])
@@ -315,19 +318,18 @@ for fileName in glob.glob('C:/Users/Пользователь/Desktop/задач�
         gr=plt.plot(Tos, LosV, linestyle='-', marker=' ', color='k')
         plt.show()
 
-        # график утечки от V-R
+        # график утечки B от V-R
 figur=plt.figure()
 axe=figur.add_subplot(111)
 axe.grid(True, which=u'major')
 axe.grid(True, which=u'minor')
 figur.gca().set_xlabel(f'V-R' ,fontsize=14)
-figur.gca().set_ylabel(r'Leak, mag',fontsize=14)
+figur.gca().set_ylabel(r'Leak B, mag',fontsize=14)
 plt.title("Red leak vs V-R")
 Size=[10]*len(Bos)
-gr=plt.scatter(Nasos, Bos, Size, marker="*", c=Nasos, cmap="jet" )
-plt.colorbar()
+gr=plt.scatter(Nasos, Bos, Size, marker="*")
 # gr=plt.plot(Nasos, Bos, linestyle='-', marker=' ', color='k')
-figur.savefig('C:/Users/Пользователь/Desktop/задача/graph.png', dpi=600)
+figur.savefig('C:/Users/Пользователь/Desktop/задача/graphB.png', dpi=600)
 plt.show()
 
 figur=plt.figure()
@@ -335,14 +337,44 @@ axe=figur.add_subplot(111)
 axe.grid(True, which=u'major')
 axe.grid(True, which=u'minor')
 figur.gca().set_xlabel(f'V-R' ,fontsize=14)
-figur.gca().set_ylabel(r'Leak, mag',fontsize=14)
+figur.gca().set_ylabel(r'Leak B, mag',fontsize=14)
 xdata = np.array(Nasos)
 plt.plot(xdata, Bos, 'b.', label='data')
 popt, pcov = curve_fit(polinom, xdata, Bos)
-plt.plot(xdata, polinom(xdata, *popt), 'r.',
+plt.plot(np.arange(xdata.min(),xdata.max(),0.05), polinom(np.arange(xdata.min(),xdata.max(),0.05), *popt), 'r-',
 label='fit: a=%5.5f, b=%5.5f, c=%5.5f, d=%5.5f, e=%5.5f' % tuple(popt))
 # plt.xlabel('x')
 # plt.ylabel('y')
 plt.legend()
-figur.savefig('C:/Users/Пользователь/Desktop/задача/fit.png', dpi=600)
+figur.savefig('C:/Users/Пользователь/Desktop/задача/fitB.png', dpi=600)
+plt.show()
+
+figur=plt.figure()
+axe=figur.add_subplot(111)
+axe.grid(True, which=u'major')
+axe.grid(True, which=u'minor')
+figur.gca().set_xlabel(f'V-R' ,fontsize=14)
+figur.gca().set_ylabel(r'Leak U, mag',fontsize=14)
+plt.title("Red leak vs V-R")
+Size=[10]*len(Uos)
+gr=plt.scatter(Nasos, Uos, Size, marker="*", c=Nasos)
+# gr=plt.plot(Nasos, Bos, linestyle='-', marker=' ', color='k')
+figur.savefig('C:/Users/Пользователь/Desktop/задача/graphU.png', dpi=600)
+plt.show()
+
+figur=plt.figure()
+axe=figur.add_subplot(111)
+axe.grid(True, which=u'major')
+axe.grid(True, which=u'minor')
+figur.gca().set_xlabel(f'V-R' ,fontsize=14)
+figur.gca().set_ylabel(r'Leak U, mag',fontsize=14)
+xdata = np.array(Nasos)
+plt.plot(xdata, Uos, 'b.', label='data')
+popt, pcov = curve_fit(polinom, xdata, Uos)
+plt.plot(np.arange(xdata.min(),xdata.max(),0.05), polinom(np.arange(xdata.min(),xdata.max(),0.05), *popt), 'r-',
+label='fit: a=%5.5f, b=%5.5f, c=%5.5f, d=%5.5f, e=%5.5f' % tuple(popt))
+# plt.xlabel('x')
+# plt.ylabel('y')
+plt.legend()
+figur.savefig('C:/Users/Пользователь/Desktop/задача/fitU.png', dpi=600)
 plt.show()
